@@ -25,8 +25,8 @@ export function Navbar() {
 
   profileButton.addEventListener('click', () => profileDialog.showModal());
   closeProfileButton.addEventListener('click', () => profileDialog.close());
-  logoutButton.addEventListener('click', () => {
-    authService.logout();
+  logoutButton.addEventListener('click', async () => {
+    await authService.logout();
     window.location.assign('/');
   });
 

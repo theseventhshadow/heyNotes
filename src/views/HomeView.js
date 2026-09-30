@@ -1,5 +1,5 @@
 import { createElement } from '../utils/dom.js';
-import { authService, DEMO_CREDENTIALS } from '../services/authService.js';
+import { authService } from '../services/authService.js';
 
 export function HomeView() {
   const currentUser = authService.getCurrentUser();
@@ -32,9 +32,6 @@ function createAuthHome() {
       createElement('p', { className: 'form-intro' }, isLogin
         ? 'Entra y vuelve a tus ideas favoritas.'
         : 'Crea un rincón para guardar todo lo que te inspira.'),
-      ...(isLogin ? [createElement('p', { className: 'demo-hint' },
-        `Prueba: ${DEMO_CREDENTIALS.email} / ${DEMO_CREDENTIALS.password}`,
-      )] : []),
       ...nameField,
       createElement('label', { className: 'form-field' }, 'Correo electrónico', createElement('input', {
         name: 'email', type: 'email', autocomplete: 'email', required: 'true', placeholder: 'tu@correo.com',
@@ -54,16 +51,16 @@ function createAuthHome() {
     renderForm();
   });
 
-  form.addEventListener('submit', (event) => {
+  form.addEventListener('submit', async (event) => {
     event.preventDefault();
     const formData = new FormData(form);
     const credentials = Object.fromEntries(formData.entries());
 
     try {
       if (mode === 'login') {
-        authService.login(credentials);
+        await authService.login(credentials);
       } else {
-        authService.register(credentials);
+        await authService.register(credentials);
       }
       window.location.assign('/notes');
     } catch (error) {

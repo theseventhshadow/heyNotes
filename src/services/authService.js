@@ -1,61 +1,51 @@
-import { storage } from '../utils/storage.js';
+let currentUser = null;
 
-const USERS_KEY = 'users';
-const SESSION_KEY = 'session';
-export const DEMO_CREDENTIALS = {
-  name: 'Usuario demo',
-  email: 'demo@heynotes.local',
-  password: 'demo1234',
-};
-
-function ensureDemoUser() {
-  const users = storage.get(USERS_KEY, []);
-  if (users.some((user) => user.email === DEMO_CREDENTIALS.email)) {
-    return;
-  }
-
-  storage.set(USERS_KEY, [
-    ...users,
-    { id: crypto.randomUUID(), ...DEMO_CREDENTIALS },
-  ]);
+async function request(path, options = {}) {
+  const response = await fetch(path, {
+    ...options,
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json', ...options.headers },
+  });
+  const data = response.status === 204 ? null : await response.json();
+  if (!response.ok) throw new Error(data?.error || 'No se pudo completar la solicitud.');
+  return data;
 }
-
-ensureDemoUser();
 
 export const authService = {
   getCurrentUser() {
-    return storage.get(SESSION_KEY);
+    return currentUser;
   },
 
-  register({ name, email, password }) {
-    const users = storage.get(USERS_KEY, []);
-    const normalizedEmail = email.trim().toLowerCase();
-
-    if (users.some((user) => user.email === normalizedEmail)) {
-      throw new Error('Ya existe una cuenta con ese correo.');
+  async restoreSession() {
+    try {
+      const data = await request('/api/auth/me');
+      currentUser = data.user;
+    } catch {
+      currentUser = null;
     }
-
-    const user = { id: crypto.randomUUID(), name: name.trim(), email: normalizedEmail, password };
-    storage.set(USERS_KEY, [...users, user]);
-    storage.set(SESSION_KEY, { id: user.id, name: user.name, email: user.email });
-    return user;
+    return currentUser;
   },
 
-  login({ email, password }) {
-    const users = storage.get(USERS_KEY, []);
-    const user = users.find(
-      (candidate) => candidate.email === email.trim().toLowerCase() && candidate.password === password,
-    );
-
-    if (!user) {
-      throw new Error('Correo o contraseña incorrectos.');
-    }
-
-    storage.set(SESSION_KEY, { id: user.id, name: user.name, email: user.email });
-    return user;
+  async register(credentials) {
+    const data = await request('/api/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(credentials),
+    });
+    currentUser = data.user;
+    return currentUser;
   },
 
-  logout() {
-    storage.remove(SESSION_KEY);
+  async login(credentials) {
+    const data = await request('/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(credentials),
+    });
+    currentUser = data.user;
+    return currentUser;
+  },
+
+  async logout() {
+    await request('/api/auth/logout', { method: 'POST' });
+    currentUser = null;
   },
 };

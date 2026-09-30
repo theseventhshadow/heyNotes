@@ -7,39 +7,45 @@ import { HomeView } from './views/HomeView.js';
 import { NotesView } from './views/NotesView.js';
 import { NotFoundView } from './views/NotFoundView.js';
 
-const navbarContainer = document.querySelector('#navbar-container');
-const footerContainer = document.querySelector('#footer-container');
-const routerOutlet = document.querySelector('#router-view');
-const app = document.querySelector('#app');
-const currentUser = authService.getCurrentUser();
+async function bootstrap() {
+  await authService.restoreSession();
 
-app.classList.toggle('landing-shell', !currentUser);
-document.documentElement.dataset.theme = getState().theme;
+  const navbarContainer = document.querySelector('#navbar-container');
+  const footerContainer = document.querySelector('#footer-container');
+  const routerOutlet = document.querySelector('#router-view');
+  const app = document.querySelector('#app');
+  const currentUser = authService.getCurrentUser();
 
-if (currentUser && window.location.pathname === '/') {
-  window.history.replaceState({}, '', '/notes');
-}
+  app.classList.toggle('landing-shell', !currentUser);
+  document.documentElement.dataset.theme = getState().theme;
 
-navbarContainer.append(Navbar());
-footerContainer.append(Footer());
-
-const router = new Router({
-  outlet: routerOutlet,
-  routes: {
-    '/': HomeView,
-    '/notes': NotesView,
-    '/404': NotFoundView,
-  },
-});
-
-router.init();
-
-document.addEventListener('click', (event) => {
-  const link = event.target.closest('a');
-  if (!link || link.origin !== window.location.origin || link.target === '_blank') {
-    return;
+  if (currentUser && window.location.pathname === '/') {
+    window.history.replaceState({}, '', '/notes');
   }
 
-  event.preventDefault();
-  router.navigate(link.pathname);
-});
+  navbarContainer.append(Navbar());
+  footerContainer.append(Footer());
+
+  const router = new Router({
+    outlet: routerOutlet,
+    routes: {
+      '/': HomeView,
+      '/notes': NotesView,
+      '/404': NotFoundView,
+    },
+  });
+
+  router.init();
+
+  document.addEventListener('click', (event) => {
+    const link = event.target.closest('a');
+    if (!link || link.origin !== window.location.origin || link.target === '_blank') {
+      return;
+    }
+
+    event.preventDefault();
+    router.navigate(link.pathname);
+  });
+}
+
+bootstrap();
