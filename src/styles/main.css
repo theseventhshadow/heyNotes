@@ -4,6 +4,8 @@
 body {
   background-color: var(--background-color);
   background-image: linear-gradient(135deg, rgb(255 248 233 / 0.5), transparent 45%), repeating-linear-gradient(0deg, rgb(111 63 38 / 0.04) 0, rgb(111 63 38 / 0.04) 1px, transparent 1px, transparent 5px);
+  background-attachment: fixed;
+  background-position: center, 0 0;
   color: var(--text-primary);
   display: flex;
   flex-direction: column;
@@ -60,9 +62,65 @@ body {
   font-weight: 700;
 }
 
-.navbar__links {
+.navbar__actions {
   display: flex;
+  align-items: center;
   gap: var(--spacing-md);
+}
+
+.navbar__action {
+  border: 0;
+  border-bottom: 1px solid transparent;
+  border-radius: 0;
+  padding: 0.25rem 0;
+  color: var(--primary-color);
+  background: transparent;
+  font-family: inherit;
+  font-size: 0.82rem;
+}
+
+.navbar__action:hover {
+  border-bottom-color: var(--secondary-color);
+  color: var(--primary-hover);
+  background: transparent;
+}
+
+.navbar__action--danger {
+  color: var(--danger-color);
+}
+
+.profile-dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 10;
+  width: min(330px, calc(100% - 2rem));
+  margin: 0;
+  border: 1px solid var(--border-color);
+  border-top: 5px solid var(--secondary-color);
+  padding: 1.75rem;
+  color: var(--text-primary);
+  background: var(--surface-color);
+  box-shadow: 8px 8px 0 rgb(111 63 38 / 0.2);
+  transform: translate(-50%, -50%);
+}
+
+.profile-dialog::backdrop {
+  background: rgb(48 33 23 / 0.48);
+}
+
+.profile-dialog h2 {
+  margin: 0.5rem 0;
+  color: var(--primary-color);
+}
+
+.profile-dialog > p:not(.eyebrow) {
+  color: var(--text-secondary);
+}
+
+.profile-dialog__close {
+  margin-top: var(--spacing-lg);
+  border-radius: 0;
 }
 
 .footer {
@@ -218,20 +276,293 @@ body {
   padding: var(--spacing-sm) var(--spacing-md);
 }
 
-.notes-grid {
+.notes-workspace {
   display: grid;
-  gap: var(--spacing-md);
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  margin-top: var(--spacing-lg);
+  grid-template-columns: minmax(230px, 290px) minmax(0, 1fr);
+  gap: clamp(1.25rem, 3vw, 2.5rem);
+  height: calc(100vh - 170px);
+  min-height: 0;
+}
+
+.notes-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 0.35rem;
+  scrollbar-color: var(--secondary-color) transparent;
+  scrollbar-width: thin;
+}
+
+.notes-list::-webkit-scrollbar,
+.note-paper::-webkit-scrollbar {
+  width: 8px;
+}
+
+.notes-list::-webkit-scrollbar-track,
+.note-paper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.notes-list::-webkit-scrollbar-thumb,
+.note-paper::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background-color: var(--secondary-color);
+  background-clip: padding-box;
+}
+
+.notes-list::-webkit-scrollbar-thumb:hover,
+.note-paper::-webkit-scrollbar-thumb:hover {
+  background-color: var(--primary-color);
+}
+
+.notes-list__header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+}
+
+.notes-list__header h1 {
+  color: var(--primary-color);
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+.new-note-button {
+  flex: 0 0 auto;
+  border-radius: 0;
+  padding: 0.55rem 0.7rem;
+  font-size: 0.78rem;
 }
 
 .note-card {
   display: grid;
-  gap: var(--spacing-sm);
+  gap: 0.3rem;
+  width: 100%;
+  border: 1px solid transparent;
+  border-left: 3px solid transparent;
+  border-radius: 0;
+  padding: 0.8rem;
+  color: var(--note-card-color);
+  background: var(--note-card-background);
+  text-align: left;
+  box-shadow: none;
 }
 
-.note-card small {
+.note-card:hover,
+.note-card--selected {
+  border-color: var(--border-color);
+  border-left-color: var(--secondary-color);
+  color: var(--note-card-color);
+  background: var(--surface-color);
+}
+
+.note-card h3,
+.note-card p {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.note-card h3 {
+  color: var(--primary-color);
+  font-size: 1rem;
+}
+
+.note-card p,
+.note-card small,
+.empty-notes {
+  color: var(--note-card-muted);
+  font-size: 0.83rem;
+}
+
+.note-paper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  padding: clamp(1.25rem, 4vw, 3rem);
+  color: var(--paper-text);
+  background-color: var(--paper-color);
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 2.05rem,
+    var(--paper-line) 2.05rem,
+    var(--paper-line) 2.1rem
+  );
+  border: 1px solid var(--border-color);
+  box-shadow: 8px 8px 0 rgb(111 63 38 / 0.12);
+  scrollbar-color: var(--secondary-color) transparent;
+  scrollbar-width: thin;
+}
+
+.note-editor-column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  min-height: 0;
+  min-width: 0;
+}
+
+.note-editor-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  min-height: 44px;
   color: var(--text-secondary);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.paper-topline,
+.paper-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+}
+
+.paper-topline {
+  margin-bottom: 1.5rem;
+  color: var(--paper-muted);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.note-feedback {
+  color: var(--secondary-color);
+  font-size: 0.75rem;
+  text-transform: none;
+}
+
+.note-title-input,
+.note-content-input {
+  border: 0;
+  border-radius: 0;
+  color: var(--paper-text);
+  background: transparent;
+  outline: none;
+  font-family: inherit;
+}
+
+.note-title-input {
+  width: 100%;
+  margin-bottom: 0.9rem;
+  font-size: clamp(1.7rem, 4vw, 2.7rem);
+  font-weight: 700;
+}
+
+.note-content-input {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  resize: vertical;
+  padding: 0;
+  font-size: 1.1rem;
+  line-height: 2.1rem;
+}
+
+.note-title-input::placeholder,
+.note-content-input::placeholder {
+  color: var(--paper-placeholder);
+}
+
+.paper-actions {
+  justify-content: flex-end;
+  margin-top: 0;
+  flex-wrap: wrap;
+}
+
+.save-note-button {
+  border-radius: 0;
+  padding: 0.75rem 1.15rem;
+}
+
+.delete-note-button,
+.cancel-delete-button,
+.confirm-delete-button {
+  border-radius: 0;
+  padding: 0.75rem 1.15rem;
+}
+
+.delete-note-button {
+  border: 1px solid var(--danger-color);
+  color: var(--danger-color);
+  background: transparent;
+}
+
+.delete-note-button:hover:not(:disabled) {
+  color: var(--surface-color);
+  background: var(--danger-color);
+}
+
+.delete-note-button:disabled {
+  cursor: not-allowed;
+  border-color: var(--border-color);
+  color: var(--border-color);
+  background: transparent;
+}
+
+.confirm-dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 10;
+  width: min(390px, calc(100% - 2rem));
+  margin: 0;
+  border: 1px solid var(--border-color);
+  border-top: 5px solid var(--danger-color);
+  padding: 1.75rem;
+  color: var(--text-primary);
+  background: var(--surface-color);
+  box-shadow: 8px 8px 0 rgb(111 63 38 / 0.2);
+  transform: translate(-50%, -50%);
+}
+
+.confirm-dialog::backdrop {
+  background: rgb(48 33 23 / 0.48);
+}
+
+.confirm-dialog h2 {
+  margin: 0.5rem 0;
+  color: var(--primary-color);
+}
+
+.confirm-dialog > p:not(.eyebrow) {
+  color: var(--text-secondary);
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-lg);
+}
+
+.cancel-delete-button {
+  color: var(--primary-color);
+  background: transparent;
+}
+
+.cancel-delete-button:hover {
+  background: var(--background-color);
+}
+
+.confirm-delete-button {
+  background: var(--danger-color);
+}
+
+.confirm-delete-button:hover {
+  background: #7d2c22;
 }
 
 button {
@@ -257,6 +588,14 @@ button:hover {
 }
 
 @media (max-width: 720px) {
+  .navbar__actions {
+    gap: 0.7rem;
+  }
+
+  .navbar__action {
+    font-size: 0.72rem;
+  }
+
   .welcome-view {
     grid-template-columns: 1fr;
     gap: var(--spacing-xl);
@@ -266,5 +605,20 @@ button:hover {
 
   .welcome-copy h2 {
     font-size: clamp(2.5rem, 14vw, 4rem);
+  }
+
+  .notes-workspace {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+
+  .notes-list {
+    overflow-y: visible;
+  }
+
+  .note-paper {
+    height: auto;
+    min-height: 540px;
+    overflow-y: visible;
   }
 }

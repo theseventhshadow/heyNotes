@@ -2,6 +2,25 @@ import { storage } from '../utils/storage.js';
 
 const USERS_KEY = 'users';
 const SESSION_KEY = 'session';
+export const DEMO_CREDENTIALS = {
+  name: 'Usuario demo',
+  email: 'demo@heynotes.local',
+  password: 'demo1234',
+};
+
+function ensureDemoUser() {
+  const users = storage.get(USERS_KEY, []);
+  if (users.some((user) => user.email === DEMO_CREDENTIALS.email)) {
+    return;
+  }
+
+  storage.set(USERS_KEY, [
+    ...users,
+    { id: crypto.randomUUID(), ...DEMO_CREDENTIALS },
+  ]);
+}
+
+ensureDemoUser();
 
 export const authService = {
   getCurrentUser() {

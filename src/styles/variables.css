@@ -9,6 +9,14 @@
   --text-secondary: #80664e;
   --border-color: #c9a77a;
   --danger-color: #9f3d2e;
+  --paper-color: #fffdf4;
+  --paper-line: rgb(111 63 38 / 0.16);
+  --paper-text: #302117;
+  --paper-muted: #80664e;
+  --paper-placeholder: rgb(128 102 78 / 0.6);
+  --note-card-color: #302117;
+  --note-card-muted: #80664e;
+  --note-card-background: rgb(255 248 233 / 0.55);
 
   /* Spacing */
   --spacing-xs: 0.25rem;
@@ -30,4 +38,24 @@
   /* Transitions */
   --transition-fast: 150ms ease;
   --transition-normal: 250ms ease;
+}
+
+:root[data-theme='dark'] {
+  --primary-color: #d49a63;
+  --primary-hover: #e3b17f;
+  --secondary-color: #e0b47d;
+  --background-color: #211812;
+  --surface-color: #302219;
+  --text-primary: #f6e4c7;
+  --text-secondary: #c7a988;
+  --border-color: #70513a;
+  --danger-color: #e47f6e;
+  --paper-color: #28201a;
+  --paper-line: rgb(224 180 125 / 0.2);
+  --paper-text: #ffefd7;
+  --paper-muted: #e0bd95;
+  --paper-placeholder: rgb(255 239 215 / 0.65);
+  --note-card-color: #ffefd7;
+  --note-card-muted: #e0bd95;
+  --note-card-background: #3b2b20;
 }
