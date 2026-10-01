@@ -123,6 +123,100 @@ body {
   border-radius: 0;
 }
 
+.profile-view {
+  display: grid;
+  gap: var(--spacing-xl);
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.profile-view__heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: var(--spacing-lg);
+}
+
+.profile-view__heading h1 {
+  margin: 0.45rem 0;
+  color: var(--primary-color);
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  line-height: 1;
+}
+
+.profile-view__heading p:not(.eyebrow) {
+  color: var(--text-secondary);
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.profile-panel {
+  border-radius: 0;
+  border-top: 5px solid var(--primary-color);
+}
+
+.profile-form {
+  display: grid;
+  gap: var(--spacing-md);
+}
+
+.profile-form h2 {
+  margin-top: -0.5rem;
+  color: var(--primary-color);
+}
+
+.profile-form__intro {
+  margin-top: -0.5rem;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.profile-form__field {
+  display: grid;
+  gap: var(--spacing-xs);
+  color: var(--primary-color);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.profile-form__field input {
+  width: 100%;
+  border: 1px solid var(--border-color);
+  border-radius: 0;
+  padding: 0.75rem 0.8rem;
+  color: var(--text-primary);
+  background: var(--paper-color);
+  outline: none;
+  font: inherit;
+  font-weight: 400;
+}
+
+.profile-form__field input:focus {
+  border-color: var(--secondary-color);
+  box-shadow: 0 0 0 3px rgb(201 167 122 / 0.3);
+}
+
+.profile-form__submit {
+  border-radius: 0;
+  margin-top: var(--spacing-sm);
+  padding: 0.75rem 1rem;
+  font-weight: 700;
+}
+
+.profile-status {
+  min-height: 1.3rem;
+  color: var(--danger-color);
+  font-size: 0.88rem;
+}
+
+.profile-status--success {
+  color: var(--secondary-color);
+}
+
 .footer {
   color: var(--text-secondary);
   padding: var(--spacing-lg);
@@ -620,5 +714,15 @@ button:hover {
     height: auto;
     min-height: 540px;
     overflow-y: visible;
+  }
+
+  .profile-view__heading,
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-view__heading {
+    align-items: start;
+    flex-direction: column;
   }
 }

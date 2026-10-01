@@ -6,6 +6,7 @@ import { getState } from './state/appState.js';
 import { HomeView } from './views/HomeView.js';
 import { NotesView } from './views/NotesView.js';
 import { NotFoundView } from './views/NotFoundView.js';
+import { ProfileView } from './views/ProfileView.js';
 
 async function bootstrap() {
   await authService.restoreSession();
@@ -31,6 +32,7 @@ async function bootstrap() {
     routes: {
       '/': HomeView,
       '/notes': NotesView,
+      '/profile': ProfileView,
       '/404': NotFoundView,
     },
   });

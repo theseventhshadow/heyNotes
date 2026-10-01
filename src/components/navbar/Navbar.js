@@ -7,8 +7,6 @@ export function Navbar() {
   const themeButton = createElement('button', { type: 'button', className: 'navbar__action' });
   const profileButton = createElement('button', { type: 'button', className: 'navbar__action' }, 'Perfil');
   const logoutButton = createElement('button', { type: 'button', className: 'navbar__action navbar__action--danger' }, 'Cerrar sesión');
-  const profileDialog = createElement('dialog', { className: 'profile-dialog' });
-  const closeProfileButton = createElement('button', { type: 'button', className: 'profile-dialog__close' }, 'Cerrar');
 
   function updateThemeButton(theme) {
     themeButton.textContent = theme === 'dark' ? 'Modo claro' : 'Modo oscuro';
@@ -23,25 +21,16 @@ export function Navbar() {
     updateThemeButton(nextTheme);
   });
 
-  profileButton.addEventListener('click', () => profileDialog.showModal());
-  closeProfileButton.addEventListener('click', () => profileDialog.close());
+  profileButton.addEventListener('click', () => window.location.assign('/profile'));
   logoutButton.addEventListener('click', async () => {
     await authService.logout();
     window.location.assign('/');
   });
-
-  profileDialog.append(
-    createElement('p', { className: 'eyebrow' }, 'Perfil'),
-    createElement('h2', {}, currentUser?.name || 'Usuario'),
-    createElement('p', {}, currentUser?.email || ''),
-    closeProfileButton,
-  );
 
   return createElement(
     'nav',
     { className: 'navbar card' },
     createElement('span', { className: 'navbar__brand' }, 'heyNotes'),
     createElement('div', { className: 'navbar__actions' }, themeButton, profileButton, logoutButton),
-    profileDialog,
   );
 }

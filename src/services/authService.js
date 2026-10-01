@@ -48,4 +48,20 @@ export const authService = {
     await request('/api/auth/logout', { method: 'POST' });
     currentUser = null;
   },
+
+  async updateProfile(details) {
+    const data = await request('/api/auth/profile', {
+      method: 'PATCH',
+      body: JSON.stringify({ action: 'details', ...details }),
+    });
+    currentUser = data.user;
+    return currentUser;
+  },
+
+  async changePassword(credentials) {
+    return request('/api/auth/profile', {
+      method: 'PATCH',
+      body: JSON.stringify({ action: 'password', ...credentials }),
+    });
+  },
 };
