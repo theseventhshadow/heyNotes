@@ -1,3 +1,5 @@
+import * as cryptoService from './cryptoService.js';
+
 let currentUser = null;
 
 async function request(path, options = {}) {
@@ -27,9 +29,10 @@ export const authService = {
   },
 
   async register(credentials) {
+    const encryptionMetadata = await cryptoService.createEncryptionMetadata(credentials.password);
     const data = await request('/api/auth/register', {
       method: 'POST',
-      body: JSON.stringify(credentials),
+      body: JSON.stringify({ ...credentials, ...encryptionMetadata }),
     });
     currentUser = data.user;
     return currentUser;
@@ -41,12 +44,21 @@ export const authService = {
       body: JSON.stringify(credentials),
     });
     currentUser = data.user;
+    try {
+      await this.unlockEncryption(credentials.password);
+    } catch (error) {
+      await request('/api/auth/logout', { method: 'POST' }).catch(() => {});
+      currentUser = null;
+      cryptoService.clearEncryptionKey();
+      throw new Error('No se pudieron desbloquear tus notas. Comprueba tu contraseña.');
+    }
     return currentUser;
   },
 
   async logout() {
     await request('/api/auth/logout', { method: 'POST' });
     currentUser = null;
+    cryptoService.clearEncryptionKey();
   },
 
   async updateProfile(details) {
@@ -59,10 +71,14 @@ export const authService = {
   },
 
   async changePassword(credentials) {
-    return request('/api/auth/profile', {
+    if (!cryptoService.isUnlocked()) await this.unlockEncryption(credentials.currentPassword);
+    const encryptionMetadata = await cryptoService.preparePasswordChange(credentials.newPassword);
+    const data = await request('/api/auth/profile', {
       method: 'PATCH',
-      body: JSON.stringify({ action: 'password', ...credentials }),
+      body: JSON.stringify({ action: 'password', ...credentials, ...encryptionMetadata }),
     });
+    currentUser = data.user;
+    return currentUser;
   },
 
   async updateTheme(theme) {
@@ -71,6 +87,26 @@ export const authService = {
       body: JSON.stringify({ action: 'theme', theme }),
     });
     currentUser = data.user;
+    return currentUser;
+  },
+
+  async unlockEncryption(password) {
+    const encryptionMetadata = await cryptoService.unlockEncryption(password, currentUser);
+    if (currentUser.encryptedDataKey) return currentUser;
+
+    const data = await request('/api/auth/profile', {
+      method: 'PATCH',
+      body: JSON.stringify({
+        action: 'encryption-init',
+        currentPassword: password,
+        ...encryptionMetadata,
+      }),
+    });
+    currentUser = data.user;
+    if (currentUser.encryptedDataKey !== encryptionMetadata.encryptedDataKey) {
+      cryptoService.clearEncryptionKey();
+      await cryptoService.unlockEncryption(password, currentUser);
+    }
     return currentUser;
   },
 };

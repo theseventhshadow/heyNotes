@@ -53,7 +53,14 @@ export async function getAuthenticatedUser(req) {
   const user = await db.collection('users').findOne({ _id: session.userId });
   if (!user) return null;
 
-  return { id: user._id.toString(), name: user.name, email: user.email, theme: user.theme || 'light' };
+  return {
+    id: user._id.toString(),
+    name: user.name,
+    email: user.email,
+    theme: user.theme || 'light',
+    encryptionSalt: user.encryptionSalt,
+    encryptedDataKey: user.encryptedDataKey,
+  };
 }
 
 export async function destroySession(req, res) {

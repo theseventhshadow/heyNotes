@@ -2,6 +2,39 @@ import { createElement } from '../utils/dom.js';
 import { authService } from '../services/authService.js';
 import { notesService } from '../services/notesService.js';
 import { NoteCard } from '../components/notes/NoteCard.js';
+import { isUnlocked } from '../services/cryptoService.js';
+
+function createUnlockView() {
+  const section = createElement('section', { className: 'not-found-view' });
+  const form = createElement('form', { className: 'auth-form' });
+  const status = createElement('p', { className: 'auth-status', role: 'status' });
+  const password = createElement('input', {
+    name: 'password', type: 'password', autocomplete: 'current-password', required: 'true',
+  });
+
+  form.append(
+    createElement('p', { className: 'eyebrow' }, 'Notas protegidas'),
+    createElement('h1', {}, 'Desbloquea tus notas'),
+    createElement('p', { className: 'form-intro' }, 'Introduce tu contraseña para descifrarlas en este dispositivo.'),
+    createElement('label', { className: 'form-field' }, 'Contraseña', password),
+    createElement('button', { type: 'submit', className: 'auth-submit' }, 'Desbloquear'),
+    status,
+  );
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    status.textContent = '';
+    try {
+      await authService.unlockEncryption(password.value);
+      window.location.reload();
+    } catch {
+      status.textContent = 'No se pudieron desbloquear las notas. Comprueba tu contraseña.';
+    }
+  });
+
+  section.append(form);
+  return section;
+}
 
 export function NotesView() {
   if (!authService.getCurrentUser()) {
@@ -13,6 +46,8 @@ export function NotesView() {
       createElement('a', { href: '/', className: 'button-link' }, 'Ir al inicio'),
     );
   }
+
+  if (!isUnlocked()) return createUnlockView();
 
   const section = createElement('section', { className: 'notes-workspace' });
   const notes = [];

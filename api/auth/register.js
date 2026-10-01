@@ -6,7 +6,7 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return sendMethodNotAllowed(res);
 
   try {
-    const { name, email, password } = req.body || {};
+    const { name, email, password, encryptionSalt, encryptedDataKey } = req.body || {};
     const normalizedEmail = email?.trim().toLowerCase();
     if (!name?.trim() || !normalizedEmail || !password || password.length < 8) {
       return res.status(400).json({ error: 'Nombre, correo y una contraseña de al menos 8 caracteres son obligatorios.' });
@@ -19,12 +19,23 @@ export default async function handler(req, res) {
       email: normalizedEmail,
       passwordHash,
       theme: 'light',
+      encryptionSalt,
+      encryptedDataKey,
       createdAt: new Date(),
     };
     const result = await db.collection('users').insertOne(user);
     await createSession(res, result.insertedId.toString());
 
-    return res.status(201).json({ user: { id: result.insertedId.toString(), name: user.name, email: user.email } });
+    return res.status(201).json({
+      user: {
+        id: result.insertedId.toString(),
+        name: user.name,
+        email: user.email,
+        theme: user.theme,
+        encryptionSalt: user.encryptionSalt,
+        encryptedDataKey: user.encryptedDataKey,
+      },
+    });
   } catch (error) {
     if (error.code === 11000) return res.status(409).json({ error: 'Ya existe una cuenta con ese correo.' });
     console.error(error);

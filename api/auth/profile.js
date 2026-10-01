@@ -4,7 +4,14 @@ import { getDb } from '../_lib/db.js';
 import { getAuthenticatedUser } from '../_lib/auth.js';
 
 function serializeUser(user) {
-  return { id: user._id.toString(), name: user.name, email: user.email, theme: user.theme || 'light' };
+  return {
+    id: user._id.toString(),
+    name: user.name,
+    email: user.email,
+    theme: user.theme || 'light',
+    encryptionSalt: user.encryptionSalt,
+    encryptedDataKey: user.encryptedDataKey,
+  };
 }
 
 export default async function handler(req, res) {
@@ -21,6 +28,20 @@ export default async function handler(req, res) {
     const db = await getDb();
     const users = db.collection('users');
     const user = await users.findOne({ _id: new ObjectId(authenticatedUser.id) });
+
+    if (action === 'encryption-init') {
+      const { encryptionSalt, encryptedDataKey } = req.body || {};
+      if (!encryptionSalt || !encryptedDataKey) {
+        return res.status(400).json({ error: 'Faltan los datos de cifrado.' });
+      }
+
+      const result = await users.findOneAndUpdate(
+        { _id: user._id, encryptionSalt: { $exists: false }, encryptedDataKey: { $exists: false } },
+        { $set: { encryptionSalt, encryptedDataKey } },
+        { returnDocument: 'after' },
+      );
+      return res.status(200).json({ user: serializeUser(result || user) });
+    }
 
     if (action === 'theme') {
       const { theme } = req.body || {};
@@ -68,9 +89,18 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Las nuevas contraseñas no coinciden.' });
       }
 
+      const { encryptionSalt, encryptedDataKey } = req.body || {};
+      if (!encryptionSalt || !encryptedDataKey) {
+        return res.status(400).json({ error: 'Debes desbloquear tus notas antes de cambiar la contraseña.' });
+      }
+
       const passwordHash = await bcrypt.hash(newPassword, 12);
-      await users.updateOne({ _id: user._id }, { $set: { passwordHash } });
-      return res.status(200).json({ message: 'Contraseña actualizada.' });
+      const result = await users.findOneAndUpdate(
+        { _id: user._id },
+        { $set: { passwordHash, encryptionSalt, encryptedDataKey } },
+        { returnDocument: 'after' },
+      );
+      return res.status(200).json({ user: serializeUser(result) });
     }
 
     return res.status(400).json({ error: 'Operación de perfil no válida.' });

@@ -7,6 +7,7 @@ function serializeNote(note) {
     id: note._id.toString(),
     title: note.title,
     content: note.content,
+    encryptionVersion: note.encryptionVersion || 0,
     createdAt: note.createdAt,
     updatedAt: note.updatedAt,
   };
@@ -29,14 +30,18 @@ export default async function handler(req, res) {
     }
 
     if (req.method === 'POST') {
-      const { title, content = '' } = req.body || {};
-      if (!title?.trim()) return res.status(400).json({ error: 'El título es obligatorio.' });
+      const { title, content = '', encryptionVersion } = req.body || {};
+      if (encryptionVersion !== 1 || typeof title !== 'string' || typeof content !== 'string') {
+        return res.status(400).json({ error: 'La nota debe enviarse cifrada.' });
+      }
+      if (!title) return res.status(400).json({ error: 'El título es obligatorio.' });
 
       const now = new Date();
       const note = {
         userId,
-        title: title.trim(),
-        content: content.trim(),
+        title,
+        content,
+        encryptionVersion: 1,
         createdAt: now,
         updatedAt: now,
       };
