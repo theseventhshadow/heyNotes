@@ -18,6 +18,7 @@ export default async function handler(req, res) {
       name: name.trim(),
       email: normalizedEmail,
       passwordHash,
+      theme: 'light',
       createdAt: new Date(),
     };
     const result = await db.collection('users').insertOne(user);

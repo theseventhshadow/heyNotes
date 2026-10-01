@@ -14,11 +14,20 @@ export function Navbar() {
   }
 
   updateThemeButton(getState().theme);
-  themeButton.addEventListener('click', () => {
+  themeButton.addEventListener('click', async () => {
+    const previousTheme = getState().theme;
     const nextTheme = getState().theme === 'dark' ? 'light' : 'dark';
     setState({ theme: nextTheme });
     document.documentElement.dataset.theme = nextTheme;
     updateThemeButton(nextTheme);
+
+    try {
+      await authService.updateTheme(nextTheme);
+    } catch {
+      setState({ theme: previousTheme });
+      document.documentElement.dataset.theme = previousTheme;
+      updateThemeButton(previousTheme);
+    }
   });
 
   profileButton.addEventListener('click', () => window.location.assign('/profile'));

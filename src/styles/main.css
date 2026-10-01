@@ -159,6 +159,10 @@ body {
   border-top: 5px solid var(--primary-color);
 }
 
+.profile-panel--wide {
+  grid-column: 1 / -1;
+}
+
 .profile-form {
   display: grid;
   gap: var(--spacing-md);
@@ -198,6 +202,16 @@ body {
 .profile-form__field input:focus {
   border-color: var(--secondary-color);
   box-shadow: 0 0 0 3px rgb(201 167 122 / 0.3);
+}
+
+.profile-form__select {
+  width: 100%;
+  border: 1px solid var(--border-color);
+  border-radius: 0;
+  padding: 0.75rem 0.8rem;
+  color: var(--text-primary);
+  background: var(--paper-color);
+  font: inherit;
 }
 
 .profile-form__submit {

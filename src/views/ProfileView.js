@@ -1,5 +1,6 @@
 import { createElement } from '../utils/dom.js';
 import { authService } from '../services/authService.js';
+import { getState, setState } from '../state/appState.js';
 
 function createField(label, properties) {
   return createElement('label', { className: 'profile-form__field' }, label, createElement('input', properties));
@@ -22,6 +23,8 @@ export function ProfileView() {
   const detailsStatus = createElement('p', { className: 'profile-status', role: 'status' });
   const passwordForm = createElement('form', { className: 'profile-form' });
   const passwordStatus = createElement('p', { className: 'profile-status', role: 'status' });
+  const themeForm = createElement('form', { className: 'profile-form' });
+  const themeStatus = createElement('p', { className: 'profile-status', role: 'status' });
 
   detailsForm.append(
     createElement('p', { className: 'eyebrow' }, 'Datos personales'),
@@ -57,6 +60,20 @@ export function ProfileView() {
     passwordStatus,
   );
 
+  const themeSelect = createElement('select', { name: 'theme', className: 'profile-form__select' },
+    createElement('option', { value: 'light' }, 'Modo claro'),
+    createElement('option', { value: 'dark' }, 'Modo oscuro'),
+  );
+  themeSelect.value = currentUser.theme || getState().theme;
+  themeForm.append(
+    createElement('p', { className: 'eyebrow' }, 'Preferencias'),
+    createElement('h2', {}, 'Apariencia'),
+    createElement('p', { className: 'profile-form__intro' }, 'Esta preferencia se guardará en tu cuenta y estará disponible en tus dispositivos.'),
+    createElement('label', { className: 'profile-form__field' }, 'Tema', themeSelect),
+    createElement('button', { type: 'submit', className: 'profile-form__submit' }, 'Guardar apariencia'),
+    themeStatus,
+  );
+
   detailsForm.addEventListener('submit', async (event) => {
     event.preventDefault();
     detailsStatus.textContent = '';
@@ -90,6 +107,23 @@ export function ProfileView() {
     }
   });
 
+  themeForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    themeStatus.textContent = '';
+
+    try {
+      const theme = themeSelect.value;
+      await authService.updateTheme(theme);
+      setState({ theme });
+      document.documentElement.dataset.theme = theme;
+      themeStatus.className = 'profile-status profile-status--success';
+      themeStatus.textContent = 'Apariencia guardada.';
+    } catch (error) {
+      themeStatus.className = 'profile-status';
+      themeStatus.textContent = error.message;
+    }
+  });
+
   section.append(
     createElement('div', { className: 'profile-view__heading' },
       createElement('div', {},
@@ -102,6 +136,7 @@ export function ProfileView() {
     createElement('div', { className: 'profile-grid' },
       createElement('div', { className: 'profile-panel card' }, detailsForm),
       createElement('div', { className: 'profile-panel card' }, passwordForm),
+      createElement('div', { className: 'profile-panel card profile-panel--wide' }, themeForm),
     ),
   );
   return section;

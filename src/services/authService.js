@@ -64,4 +64,13 @@ export const authService = {
       body: JSON.stringify({ action: 'password', ...credentials }),
     });
   },
+
+  async updateTheme(theme) {
+    const data = await request('/api/auth/profile', {
+      method: 'PATCH',
+      body: JSON.stringify({ action: 'theme', theme }),
+    });
+    currentUser = data.user;
+    return currentUser;
+  },
 };

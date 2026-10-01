@@ -2,7 +2,7 @@ import { Navbar } from './components/navbar/Navbar.js';
 import { Footer } from './components/footer/Footer.js';
 import { Router } from './router/router.js';
 import { authService } from './services/authService.js';
-import { getState } from './state/appState.js';
+import { getState, setState } from './state/appState.js';
 import { HomeView } from './views/HomeView.js';
 import { NotesView } from './views/NotesView.js';
 import { NotFoundView } from './views/NotFoundView.js';
@@ -18,7 +18,9 @@ async function bootstrap() {
   const currentUser = authService.getCurrentUser();
 
   app.classList.toggle('landing-shell', !currentUser);
-  document.documentElement.dataset.theme = getState().theme;
+  const initialTheme = currentUser?.theme || getState().theme;
+  setState({ theme: initialTheme });
+  document.documentElement.dataset.theme = initialTheme;
 
   if (currentUser && window.location.pathname === '/') {
     window.history.replaceState({}, '', '/notes');

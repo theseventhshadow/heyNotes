@@ -4,7 +4,7 @@ import { getDb } from '../_lib/db.js';
 import { getAuthenticatedUser } from '../_lib/auth.js';
 
 function serializeUser(user) {
-  return { id: user._id.toString(), name: user.name, email: user.email };
+  return { id: user._id.toString(), name: user.name, email: user.email, theme: user.theme || 'light' };
 }
 
 export default async function handler(req, res) {
@@ -18,11 +18,26 @@ export default async function handler(req, res) {
     if (!authenticatedUser) return res.status(401).json({ error: 'Necesitas iniciar sesión.' });
 
     const { action, currentPassword } = req.body || {};
-    if (!currentPassword) return res.status(400).json({ error: 'La contraseña actual es obligatoria.' });
-
     const db = await getDb();
     const users = db.collection('users');
     const user = await users.findOne({ _id: new ObjectId(authenticatedUser.id) });
+
+    if (action === 'theme') {
+      const { theme } = req.body || {};
+      if (!['light', 'dark'].includes(theme)) {
+        return res.status(400).json({ error: 'Tema no válido.' });
+      }
+
+      const result = await users.findOneAndUpdate(
+        { _id: user._id },
+        { $set: { theme } },
+        { returnDocument: 'after' },
+      );
+      return res.status(200).json({ user: serializeUser(result) });
+    }
+
+    if (!currentPassword) return res.status(400).json({ error: 'La contraseña actual es obligatoria.' });
+
     const passwordMatches = user && await bcrypt.compare(currentPassword, user.passwordHash);
 
     if (!passwordMatches) return res.status(401).json({ error: 'La contraseña actual no es correcta.' });
