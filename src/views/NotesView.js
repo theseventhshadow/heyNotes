@@ -26,7 +26,7 @@ function createUnlockView() {
     status.textContent = '';
     try {
       await authService.unlockEncryption(password.value);
-      window.location.reload();
+      section.replaceWith(NotesView());
     } catch {
       status.textContent = 'No se pudieron desbloquear las notas. Comprueba tu contraseña.';
     }
