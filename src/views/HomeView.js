@@ -62,7 +62,9 @@ function createAuthHome() {
       } else {
         await authService.register(credentials);
       }
-      window.location.assign('/notes');
+      document.querySelector('#app').classList.remove('landing-shell');
+      window.history.pushState({}, '', '/notes');
+      window.dispatchEvent(new PopStateEvent('popstate'));
     } catch (error) {
       status.textContent = error.message;
     }

@@ -5,8 +5,8 @@ import { NoteCard } from '../components/notes/NoteCard.js';
 import { isUnlocked } from '../services/cryptoService.js';
 
 function createUnlockView() {
-  const section = createElement('section', { className: 'not-found-view' });
-  const form = createElement('form', { className: 'auth-form' });
+  const section = createElement('section', { className: 'unlock-view' });
+  const form = createElement('form', { className: 'auth-form unlock-panel' });
   const status = createElement('p', { className: 'auth-status', role: 'status' });
   const password = createElement('input', {
     name: 'password', type: 'password', autocomplete: 'current-password', required: 'true',
